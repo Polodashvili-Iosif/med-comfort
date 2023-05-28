@@ -2,7 +2,7 @@ FROM python:3.7-slim
 
 WORKDIR /app
 
-COPY med_comfort .
+COPY . .
 
 RUN pip3 install -r requirements.txt --no-cache-dir
 
