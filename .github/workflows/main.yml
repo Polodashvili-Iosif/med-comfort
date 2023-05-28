@@ -32,3 +32,24 @@ jobs:
     - name: Django тесты
       run: |
         python med_comfort/manage.py test
+
+  build_and_push_to_docker_hub:
+    name: Отправка Docker image в Docker Hub
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - name: Проверка репозитория
+        uses: actions/checkout@v2
+      - name: Настройка Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Вход в Docker
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Отправка в Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/med_comfort:latest
+          file: med_comfort/Dockerfile
