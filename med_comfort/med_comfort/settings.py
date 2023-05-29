@@ -18,7 +18,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [os.getenv('HOST'), 'med-comfort.online']
+ALLOWED_HOSTS = [os.getenv('HOST'), 'med-comfort.online', 'web']
 
 
 # Application definition
