@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   tests:
+    name: Тестирование
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -54,3 +55,30 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/med_comfort:latest
           file: med_comfort/Dockerfile
+  deploy:
+    name: Развёртывание
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Выполнение удаленных команд ssh для развертывания
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: |
+            sudo docker-compose stop
+            sudo docker-compose rm web
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/med_comfort
+            touch .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo HOST=${{ secrets.HOST }} >> .env
+            echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+            sudo docker-compose up -d
