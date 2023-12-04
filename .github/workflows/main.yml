@@ -61,6 +61,16 @@ jobs:
     needs: build_and_push_to_docker_hub
     if: github.ref == 'refs/heads/main'
     steps:
+      - name: Копирование docker-compose.yaml
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: "infra/docker-compose.yaml"
+          target: "med-comfort"
+
       - name: Выполнение удаленных команд ssh для развертывания
         uses: appleboy/ssh-action@master
         with:
@@ -69,6 +79,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            cd med-comfort
             sudo docker-compose stop
             sudo docker-compose rm web
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/med_comfort
